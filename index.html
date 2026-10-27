@@ -1,0 +1,1269 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KV Freight Services</title>
+    <meta name="description" content="A scroll-driven freight hero experience for KV, showcasing reach-stacker handling and integrated freight logistics." />
+    <meta property="og:title" content="KV Freight Services" />
+    <meta property="og:description" content="A scroll-driven freight hero experience for KV, showcasing reach-stacker handling and integrated freight logistics." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Google Fonts: Anton, Archivo, JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+
+    <style>
+      /* CSS Reset & Variables */
+      *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --u: min(100vw / 1440, 100vh / 960);
+        --edge-px: 44.8vh;
+        --ph: 0;
+        --color-white: #ffffff;
+        --color-ink: #111111;
+        --color-cobalt: #2f63ff;
+        --color-giant: #e9e9e9;
+      }
+
+      @media (max-width: 767px), (orientation: portrait) {
+        :root {
+          --u: min(100vw / 430, 1.4px);
+          --edge-px: 36vh;
+        }
+      }
+
+      /* CRITICAL: Never set overflow-x: hidden on html or body, as it breaks position: sticky */
+      html {
+        scroll-behavior: auto; /* Required for frame-by-frame scrub mapping */
+        background-color: var(--color-white);
+        color: var(--color-ink);
+        font-family: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        min-height: 100%;
+        width: 100%;
+      }
+
+      body {
+        width: 100%;
+        min-height: 100%;
+        background-color: var(--color-white);
+        position: relative;
+        overflow-x: clip; /* clip does NOT create a scroll container, keeping sticky functional */
+      }
+
+      /* Track: JS dynamically sets height to (1 + A + B) * viewport */
+      .track {
+        position: relative;
+        width: 100%;
+        min-height: 400vh;
+        background-color: var(--color-white);
+      }
+
+      /* Nav: Absolute at the top of the track, scrolls away naturally */
+      .nav {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: auto;
+        padding: calc(34 * var(--u)) calc(48 * var(--u));
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 50;
+        pointer-events: auto;
+      }
+
+      @media (max-width: 767px), (orientation: portrait) {
+        .nav {
+          padding: 20px 24px;
+        }
+      }
+
+      .nav-logo {
+        font-family: 'Archivo', sans-serif;
+        font-size: calc(30 * var(--u));
+        font-weight: 600;
+        letter-spacing: -0.06em;
+        line-height: 1;
+        color: var(--color-ink);
+        text-decoration: none;
+        user-select: none;
+      }
+
+      @media (max-width: 767px), (orientation: portrait) {
+        .nav-logo {
+          font-size: 26px;
+        }
+      }
+
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: calc(36 * var(--u));
+      }
+
+      @media (max-width: 767px), (orientation: portrait) {
+        .nav-right {
+          gap: 16px;
+        }
+      }
+
+      .nav-btn {
+        font-family: 'Archivo', sans-serif;
+        font-size: calc(10 * var(--u));
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--color-ink);
+        text-decoration: none;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+
+      .nav-btn:hover {
+        opacity: 0.65;
+      }
+
+      .nav-btn:focus-visible {
+        outline: 2px solid var(--color-cobalt);
+        outline-offset: 4px;
+      }
+
+      @media (max-width: 767px), (orientation: portrait) {
+        .nav-btn {
+          font-size: 11px;
+        }
+        .nav-follow {
+          display: none !important;
+        }
+      }
+
+      .nav-pill {
+        border: 1px solid var(--color-ink);
+        border-radius: 9999px;
+        padding: calc(8 * var(--u)) calc(18 * var(--u));
+        line-height: 1.2;
+      }
+
+      @media (max-width: 767px), (orientation: portrait) {
+        .nav-pill {
+          padding: 7px 14px;
+        }
+      }
+
+      .nav-pill:hover {
+        background-color: var(--color-ink);
+        color: var(--color-white);
+        opacity: 1;
+      }
+
+      /* Scene: Sticky at top: 0, 100vh / 100lvh, overflow: hidden */
+      .scene {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        height: 100lvh;
+        overflow: hidden;
+        background: linear-gradient(to bottom, #ffffff var(--edge-px), #111111 var(--edge-px));
+        z-index: 1;
+      }
+
+      /* Layer 1: The Video Element, absolutely positioned by JS */
+      #freight-video {
+        position: absolute;
+        display: block;
+        pointer-events: none;
+        user-select: none;
+        object-fit: fill;
+        z-index: 1;
+      }
+
+      /* Layer 2: Giant Letters "OUR SERVICES" with mix-blend-mode: darken */
+      .giant-letters-wrap {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: var(--edge-px);
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 2;
+        mix-blend-mode: darken;
+      }
+
+      .giant-letters {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        white-space: nowrap;
+        font-family: 'Anton', Impact, sans-serif;
+        font-size: calc(330 * var(--u));
+        line-height: 0.8;
+        color: var(--color-giant);
+        text-transform: uppercase;
+        user-select: none;
+        transform: translate3d(calc(var(--letters-x, 100vw) * 1px), 0, 0);
+        will-change: transform;
+      }
+
+      @media (max-width: 767px), (orientation: portrait) {
+        .giant-letters {
+          font-size: calc(180 * var(--u));
+        }
+      }
+
+      /* Layer 3: Speed Readout (top-left 26u, 52u) */
+      .speed-readout {
+        position: absolute;
+        top: calc(52 * var(--u));
+        left: calc(26 * var(--u));
+        font-family: 'JetBrains Mono', monospace;
+        font-size: calc(10.5 * var(--u));
+        font-weight: 400;
+        color: var(--color-ink);
+        letter-spacing: 0.04em;
+        font-variant-numeric: tabular-nums;
+        opacity: var(--ph, 0);
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        user-select: none;
+        z-index: 10;
+      }
+
+      @media (max-width: 767px), (orientation: portrait) {
+        .speed-readout {
+          top: 22px;
+          left: 20px;
+          font-size: 11px;
+        }
+      }
+
+      /* Layer 4: Dark Band from --edge-px to bottom
+         CRITICAL: background must be transparent so the video underneath is visible;
+         the video already has the black ground band rising to 44.8%! */
+      .band {
+        position: absolute;
+        top: var(--edge-px);
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: transparent;
+        overflow: hidden;
+        z-index: 4;
+        pointer-events: none;
+      }
+
+      /* The horizontal strip inside band */
+      .strip {
+        position: absolute;
+        top: calc(76 * var(--u));
+        left: 0;
+        display: flex;
+        align-items: flex-start;
+        gap: calc(120 * var(--u));
+        color: var(--color-white);
+        transform: translate3d(calc(var(--strip-x, 100vw) * 1px), 0, 0);
+        will-change: transform;
+        white-space: nowrap;
+        pointer-events: auto;
+      }
+
+      @media (max-width: 767px), (orientation: portrait) {
+        .strip {
+          top: calc(44 * var(--u));
+          gap: calc(56 * var(--u));
+          padding-left: 22px;
+        }
+      }
+
+      /* Lead block inside strip */
+      .lead-block {
+        display: flex;
+        align-items: flex-start;
+        gap: calc(64 * var(--u));
+        flex-shrink: 0;
+        white-space: normal;
+      }
+
+      @media (max-width: 767px), (orientation: portrait) {
+        .lead-block {
+          flex-direction: column;
+          gap: calc(24 * var(--u));
+        }
+      }
+
+      .lead-headline {
+        font-family: 'Anton', Impact, sans-serif;
+        font-size: calc(64 * var(--u));
+        line-height: 0.98;
+        text-transform: uppercase;
+        color: var(--color-white);
+        flex-shrink: 0;
+        letter-spacing: -0.01em;
+      }
+
+      @media (max-width: 767px), (orientation: portrait) {
+        .lead-headline {
+          font-size: calc(46 * var(--u));
+        }
+      }
+
+      .lead-headline .text-cobalt {
+        color: var(--color-cobalt);
+      }
+
+      .lead-text-col {
+        width: calc(250 * var(--u));
+        display: flex;
+        flex-direction: column;
+        gap: calc(16 * var(--u));
+        flex-shrink: 0;
+      }
+
+      @media (max-width: 767px), (orientation: portrait) {
+        .lead-text-col {
+          width: calc(300 * var(--u));
+          gap: 12px;
+        }
+      }
+
+      .lead-text-col p {
+        font-family: 'Archivo', sans-serif;
+        font-size: calc(12 * var(--u));
+        line-height: 1.48;
+        color: rgba(255, 255, 255, 0.62);
+        font-weight: 400;
+      }
+
+      @media (max-width: 767px), (orientation: portrait) {
+        .lead-text-col p {
+          font-size: calc(13 * var(--u));
+        }
+      }
+
+      /* Cards container & 5 Service Cards */
+      .cards-list {
+        display: flex;
+        align-items: flex-start;
+        flex-shrink: 0;
+      }
+
+      .service-card {
+        width: calc(270 * var(--u));
+        padding-left: calc(30 * var(--u));
+        padding-right: calc(30 * var(--u));
+        border-left: 1px solid rgba(255, 255, 255, 0.12);
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        white-space: normal;
+        pointer-events: auto;
+      }
+
+      .service-card:first-child {
+        border-left: none;
+        padding-left: 0;
+      }
+
+      @media (max-width: 767px), (orientation: portrait) {
+        .service-card {
+          width: calc(250 * var(--u));
+          padding-left: calc(20 * var(--u));
+          padding-right: calc(20 * var(--u));
+        }
+      }
+
+      .card-icon-wrap {
+        width: calc(38 * var(--u));
+        height: calc(38 * var(--u));
+        margin-bottom: calc(28 * var(--u));
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        color: var(--color-white);
+      }
+
+      .card-icon-wrap svg {
+        width: 100%;
+        height: 100%;
+        stroke: var(--color-white);
+        stroke-width: 1.8;
+        fill: none;
+      }
+
+      .card-title {
+        font-family: 'Anton', Impact, sans-serif;
+        font-size: calc(26 * var(--u));
+        line-height: 1.0;
+        text-transform: uppercase;
+        margin-bottom: calc(18 * var(--u));
+        letter-spacing: 0;
+      }
+
+      @media (max-width: 767px), (orientation: portrait) {
+        .card-title {
+          font-size: calc(26 * var(--u));
+        }
+      }
+
+      .card-body {
+        font-family: 'Archivo', sans-serif;
+        font-size: calc(12.4 * var(--u));
+        line-height: 1.48;
+        font-weight: 400;
+      }
+
+      @media (max-width: 767px), (orientation: portrait) {
+        .card-body {
+          font-size: calc(13 * var(--u));
+        }
+      }
+
+      /* Card reveal text styling with background-clip: text */
+      .card-reveal-text {
+        background-color: var(--color-white);
+        background-repeat: no-repeat;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        display: block;
+        will-change: background-image;
+      }
+
+      /* Outline Pill "Our services" centred 36u from bottom */
+      .services-pill {
+        position: absolute;
+        bottom: calc(36 * var(--u));
+        left: 50%;
+        transform: translate(-50%, calc((1 - var(--ph, 0)) * 24px));
+        opacity: var(--ph, 0);
+        transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, border-color 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: calc(9 * var(--u)) calc(22 * var(--u));
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 9999px;
+        color: var(--color-white);
+        font-family: 'Archivo', sans-serif;
+        font-size: calc(10 * var(--u));
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        text-decoration: none;
+        cursor: pointer;
+        z-index: 20;
+        background: transparent;
+        white-space: nowrap;
+        pointer-events: auto;
+      }
+
+      @media (max-width: 767px), (orientation: portrait) {
+        .services-pill {
+          bottom: 24px;
+          padding: 8px 18px;
+          font-size: 11px;
+        }
+      }
+
+      .services-pill:hover {
+        border-color: var(--color-white);
+        background-color: rgba(255, 255, 255, 0.12);
+      }
+
+      .services-pill:focus-visible {
+        outline: 2px solid var(--color-cobalt);
+        outline-offset: 4px;
+      }
+
+      /* Subtle scroll cue indicator on first load */
+      .scroll-cue {
+        position: absolute;
+        bottom: calc(36 * var(--u));
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        color: var(--color-white);
+        font-family: 'Archivo', sans-serif;
+        font-size: calc(9 * var(--u));
+        font-weight: 500;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        opacity: calc(1 - var(--ph, 0));
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        z-index: 10;
+        mix-blend-mode: difference;
+      }
+
+      @media (max-width: 767px), (orientation: portrait) {
+        .scroll-cue {
+          bottom: 24px;
+          font-size: 10px;
+        }
+      }
+
+      .scroll-cue-line {
+        width: 1px;
+        height: 18px;
+        background-color: currentColor;
+        animation: pulseLine 2s infinite ease-in-out;
+      }
+
+      @keyframes pulseLine {
+        0%, 100% { transform: scaleY(0.4); opacity: 0.3; }
+        50% { transform: scaleY(1); opacity: 1; }
+      }
+
+      /* Interactive Drawers & Overlays */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(17, 17, 17, 0.6);
+        backdrop-filter: blur(4px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        z-index: 100;
+      }
+
+      .modal-backdrop.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        max-width: 480px;
+        background-color: #ffffff;
+        color: var(--color-ink);
+        box-shadow: -8px 0 32px rgba(0, 0, 0, 0.16);
+        transform: translateX(100%);
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 101;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        padding: 40px;
+      }
+
+      .drawer.open {
+        transform: translateX(0);
+      }
+
+      @media (max-width: 600px) {
+        .drawer {
+          padding: 24px;
+        }
+      }
+
+      .drawer-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(17, 17, 17, 0.08);
+      }
+
+      .drawer-title {
+        font-family: 'Anton', Impact, sans-serif;
+        font-size: 28px;
+        letter-spacing: -0.01em;
+        text-transform: uppercase;
+      }
+
+      .drawer-close {
+        background: transparent;
+        border: none;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 14px;
+        cursor: pointer;
+        padding: 8px 12px;
+        border-radius: 4px;
+        color: var(--color-ink);
+      }
+
+      .drawer-close:hover {
+        background: rgba(17, 17, 17, 0.06);
+      }
+
+      .drawer-content {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .form-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+        color: #555555;
+      }
+
+      .form-input, .form-select, .form-textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        font-family: 'Archivo', sans-serif;
+        font-size: 14px;
+        color: var(--color-ink);
+        background: #ffffff;
+        transition: border-color 0.2s ease;
+      }
+
+      .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        border-color: var(--color-cobalt);
+        box-shadow: 0 0 0 1px var(--color-cobalt);
+      }
+
+      .form-submit-btn {
+        margin-top: 12px;
+        padding: 14px 24px;
+        background: var(--color-ink);
+        color: var(--color-white);
+        border: none;
+        border-radius: 4px;
+        font-family: 'Archivo', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+
+      .form-submit-btn:hover {
+        background: var(--color-cobalt);
+      }
+
+      .drawer-nav-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-top: 12px;
+      }
+
+      .drawer-nav-item a {
+        font-family: 'Anton', Impact, sans-serif;
+        font-size: 32px;
+        color: var(--color-ink);
+        text-decoration: none;
+        text-transform: uppercase;
+        transition: color 0.2s ease, transform 0.2s ease;
+        display: inline-block;
+      }
+
+      .drawer-nav-item a:hover {
+        color: var(--color-cobalt);
+        transform: translateX(8px);
+      }
+
+      .drawer-meta {
+        margin-top: auto;
+        padding-top: 32px;
+        border-top: 1px solid rgba(17, 17, 17, 0.08);
+        font-size: 12px;
+        color: #777777;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Main Track -->
+    <main class="track" id="track">
+      <!-- Absolute Navigation at top of track: scrolls away naturally -->
+      <header class="nav" id="nav">
+        <a href="#top" class="nav-logo" aria-label="KV Group Home">KV</a>
+        <nav class="nav-right" aria-label="Main Navigation">
+          <button type="button" class="nav-btn" id="menu-btn" aria-label="Open Navigation Menu">→ Menu</button>
+          <button type="button" class="nav-btn nav-follow" id="follow-btn" aria-label="Follow KV Freight Updates">Follow</button>
+          <button type="button" class="nav-btn nav-pill" id="quote-btn" aria-label="Work with us">Work with us</button>
+        </nav>
+      </header>
+
+      <!-- Sticky Scene Viewport (100vh / 100lvh) -->
+      <section class="scene" id="scene" aria-label="KV Freight Interactive Story">
+        <!-- Layer 1: Handling Clip Video -->
+        <video
+          id="freight-video"
+          playsinline
+          muted
+          crossorigin="anonymous"
+          preload="auto"
+          poster="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/2307e4bf-be39-42b4-b579-e168aeccabf0.jpg"
+          aria-label="Teal reach-stacker lifting navy container onto black semi-truck trailer"
+        ></video>
+
+        <!-- Layer 2: Giant Letters "OUR SERVICES" with mix-blend-mode: darken -->
+        <div class="giant-letters-wrap" aria-hidden="true">
+          <div class="giant-letters" id="giant-letters">OUR SERVICES</div>
+        </div>
+
+        <!-- Layer 3: Speed Readout (top-left 26u, 52u) -->
+        <div class="speed-readout" id="speed-readout" aria-live="polite">00 KM/H</div>
+
+        <!-- Layer 4: Band from --edge-px to bottom (transparent background so video ground shows through) -->
+        <div class="band" id="band">
+          <!-- Horizontal Strip Sliding in from Right -->
+          <div class="strip" id="strip">
+            <!-- Lead Block -->
+            <div class="lead-block">
+              <h2 class="lead-headline">
+                EVERYTHING YOUR<br />
+                FREIGHT NEEDS.<br />
+                <span class="text-cobalt">UNDER ONE GROUP.</span>
+              </h2>
+              <div class="lead-text-col">
+                <p>From air to sea, from customs clearance to the last mile, we bring decades of practice to every freight discipline.</p>
+                <p>One integrated network means one partner, one point of contact and full visibility from origin to destination.</p>
+              </div>
+            </div>
+
+            <!-- Five Service Cards -->
+            <div class="cards-list" id="cards-list">
+              <!-- Card 1: Air Freight -->
+              <article class="service-card" data-index="0">
+                <div class="card-icon-wrap" aria-hidden="true">
+                  <svg viewBox="0 0 38 38" fill="none" stroke="currentColor">
+                    <path d="M4 22L16 18L32 6L35 8L22 20L31 29L28 32L17 24L11 26L4 22Z" stroke-linejoin="round" />
+                    <path d="M12 19L7 14L10 13L15 17" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <h3 class="card-title card-reveal-text">AIR<br />FREIGHT</h3>
+                <p class="card-body card-reveal-text">Express, priority and deferred options across global lanes, booked and tracked end to end.</p>
+              </article>
+
+              <!-- Card 2: Ocean Freight -->
+              <article class="service-card" data-index="1">
+                <div class="card-icon-wrap" aria-hidden="true">
+                  <svg viewBox="0 0 38 38" fill="none" stroke="currentColor">
+                    <path d="M5 25L8 31H30L34 25L32 19H7L5 25Z" stroke-linejoin="round" />
+                    <path d="M10 19V11H18V19" stroke-linejoin="round" />
+                    <path d="M20 19V14H27V19" stroke-linejoin="round" />
+                    <path d="M13 11V7H15V11" stroke-linecap="round" />
+                    <path d="M2 33C5 31 8 31 11 33C14 35 17 35 20 33C23 31 26 31 29 33C32 35 35 35 37 33" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <h3 class="card-title card-reveal-text">OCEAN<br />FREIGHT</h3>
+                <p class="card-body card-reveal-text">FCL and LCL sailings on every major trade lane, with carrier choice based on cost and transit time.</p>
+              </article>
+
+              <!-- Card 3: Customs Brokerage -->
+              <article class="service-card" data-index="2">
+                <div class="card-icon-wrap" aria-hidden="true">
+                  <svg viewBox="0 0 38 38" fill="none" stroke="currentColor">
+                    <path d="M8 5H24L30 11V33H8V5Z" stroke-linejoin="round" />
+                    <path d="M24 5V11H30" stroke-linejoin="round" />
+                    <path d="M13 18H25" stroke-linecap="round" />
+                    <path d="M13 23H21" stroke-linecap="round" />
+                    <circle cx="25" cy="27" r="6" fill="#111" />
+                    <path d="M22.5 27L24.5 29L28 25" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </div>
+                <h3 class="card-title card-reveal-text">CUSTOMS<br />BROKERAGE</h3>
+                <p class="card-body card-reveal-text">Licensed in-house brokers for classification, duties and inspections, so goods clear first time.</p>
+              </article>
+
+              <!-- Card 4: Warehousing and 3PL -->
+              <article class="service-card" data-index="3">
+                <div class="card-icon-wrap" aria-hidden="true">
+                  <svg viewBox="0 0 38 38" fill="none" stroke="currentColor">
+                    <path d="M4 14L19 6L34 14V32H4V14Z" stroke-linejoin="round" />
+                    <path d="M14 32V21H24V32" stroke-linejoin="round" />
+                    <path d="M14 26H24" stroke-linecap="round" />
+                    <path d="M10 17H12" stroke-linecap="round" />
+                    <path d="M26 17H28" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <h3 class="card-title card-reveal-text">WAREHOUSING<br />& 3PL</h3>
+                <p class="card-body card-reveal-text">Bonded and general storage, pick and pack, and distribution that plugs straight into transport.</p>
+              </article>
+
+              <!-- Card 5: Project Cargo -->
+              <article class="service-card" data-index="4">
+                <div class="card-icon-wrap" aria-hidden="true">
+                  <svg viewBox="0 0 38 38" fill="none" stroke="currentColor">
+                    <path d="M6 7H32M19 7V16" stroke-linecap="round" />
+                    <path d="M19 16C19 19 15 20 15 22C15 24 17 25 19 25C21 25 23 24 23 22" stroke-linecap="round" />
+                    <path d="M10 26L18 24M28 26L20 24" stroke-linecap="round" />
+                    <rect x="9" y="26" width="20" height="9" rx="1" stroke-linejoin="round" />
+                    <path d="M15 26V35M23 26V35" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <h3 class="card-title card-reveal-text">PROJECT<br />CARGO</h3>
+                <p class="card-body card-reveal-text">Oversized and heavy-lift moves, engineered, permitted and escorted from factory to foundation.</p>
+              </article>
+            </div>
+          </div>
+
+          <!-- "Our services" outline pill -->
+          <button type="button" class="services-pill" id="services-pill" aria-label="Explore our services">
+            Our services
+          </button>
+        </div>
+
+        <!-- Initial Scroll Cue -->
+        <div class="scroll-cue" id="scroll-cue" aria-hidden="true">
+          <span>Scroll</span>
+          <div class="scroll-cue-line"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Interactive Drawer: Work with us / Quote modal -->
+    <div class="modal-backdrop" id="modal-backdrop" aria-hidden="true"></div>
+
+    <aside class="drawer" id="quote-drawer" role="dialog" aria-modal="true" aria-labelledby="quote-drawer-title" aria-hidden="true">
+      <div class="drawer-header">
+        <h2 class="drawer-title" id="quote-drawer-title">Work With Us</h2>
+        <button type="button" class="drawer-close" id="quote-drawer-close" aria-label="Close quote modal">[ESC] ✕</button>
+      </div>
+      <div class="drawer-content">
+        <p style="font-size: 14px; color: #555; line-height: 1.5;">Connect with KV Group logistics directors and lane specialists for dedicated capacity and engineered routing.</p>
+        <form id="quote-form" onsubmit="event.preventDefault(); alert('Inquiry received. A KV logistics manager will contact you within 2 business hours.'); document.getElementById('quote-drawer').classList.remove('open'); document.getElementById('modal-backdrop').classList.remove('open');">
+          <div class="form-group">
+            <label class="form-label" for="quote-name">Full Name</label>
+            <input class="form-input" id="quote-name" type="text" required placeholder="Elena Rostova" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="quote-company">Company</label>
+            <input class="form-input" id="quote-company" type="text" required placeholder="Vanguard Industrial Ltd." />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="quote-email">Corporate Email</label>
+            <input class="form-input" id="quote-email" type="email" required placeholder="e.rostova@vanguard.com" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="quote-mode">Freight Service</label>
+            <select class="form-select" id="quote-mode">
+              <option value="ocean">Ocean Freight (FCL/LCL)</option>
+              <option value="air">Air Freight (Priority / Charter)</option>
+              <option value="customs">Customs Brokerage & Clearance</option>
+              <option value="warehousing">Warehousing & Contract 3PL</option>
+              <option value="project">Project Cargo & Heavy Lift</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="quote-notes">Lane Details / Cargo Specs</label>
+            <textarea class="form-textarea" id="quote-notes" rows="3" placeholder="Origin, destination, cargo volume, or timeline..."></textarea>
+          </div>
+          <button type="submit" class="form-submit-btn">Submit Logistics Brief</button>
+        </form>
+        <div class="drawer-meta">
+          <div>KV Group Global Operations</div>
+          <div>Rotterdam · Antwerp · Singapore · Chicago · Hamburg</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Interactive Drawer: Menu -->
+    <aside class="drawer" id="menu-drawer" role="dialog" aria-modal="true" aria-labelledby="menu-drawer-title" aria-hidden="true">
+      <div class="drawer-header">
+        <h2 class="drawer-title" id="menu-drawer-title">Navigation</h2>
+        <button type="button" class="drawer-close" id="menu-drawer-close" aria-label="Close menu">[ESC] ✕</button>
+      </div>
+      <div class="drawer-content">
+        <ul class="drawer-nav-list">
+          <li class="drawer-nav-item"><a href="#services" id="menu-link-services">Our Services</a></li>
+          <li class="drawer-nav-item"><a href="#network" id="menu-link-network">Global Lanes</a></li>
+          <li class="drawer-nav-item"><a href="#fleet" id="menu-link-fleet">Equipment & Fleet</a></li>
+          <li class="drawer-nav-item"><a href="#compliance" id="menu-link-compliance">Customs & Compliance</a></li>
+          <li class="drawer-nav-item"><a href="#contact" id="menu-link-contact">Contact Group</a></li>
+        </ul>
+        <div class="drawer-meta">
+          <div style="font-weight: 600; color: #111; margin-bottom: 4px;">KV Freight Group Headquarters</div>
+          <div>Willemskade 44, 3016 Rotterdam, Netherlands</div>
+          <div>dispatch@kv-freight.com · +31 10 492 8800</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Vanilla JavaScript: Sizing, Robust rAF Scrub Loop, Recorder Mode -->
+    <script>
+      (function () {
+        'use strict';
+
+        // DOM Elements
+        const trackEl = document.getElementById('track');
+        const sceneEl = document.getElementById('scene');
+        const videoEl = document.getElementById('freight-video');
+        const lettersEl = document.getElementById('giant-letters');
+        const stripEl = document.getElementById('strip');
+        const speedEl = document.getElementById('speed-readout');
+        const servicesPill = document.getElementById('services-pill');
+        const cards = Array.from(document.querySelectorAll('.service-card'));
+
+        // Modals
+        const backdrop = document.getElementById('modal-backdrop');
+        const quoteDrawer = document.getElementById('quote-drawer');
+        const menuDrawer = document.getElementById('menu-drawer');
+        const quoteBtn = document.getElementById('quote-btn');
+        const menuBtn = document.getElementById('menu-btn');
+        const followBtn = document.getElementById('follow-btn');
+        const quoteClose = document.getElementById('quote-drawer-close');
+        const menuClose = document.getElementById('menu-drawer-close');
+        const menuLinkServices = document.getElementById('menu-link-services');
+
+        // Video URLs
+        const URL_1080P = 'https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/409763c0-95f4-49d3-a601-dc564d55072b.mp4';
+        const URL_720P = 'https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/b3718419-7a0a-478d-bfb0-0ff8bef7f3f7.mp4';
+
+        // Select resolution based on viewport width
+        const chosenVideoSrc = window.innerWidth <= 900 ? URL_720P : URL_1080P;
+        videoEl.src = chosenVideoSrc;
+        videoEl.load();
+
+        // Constants per specification
+        const A = 2.4; // 2.4 viewports for the clip
+        let B = 2.2;   // Calculated dynamically based on strip width
+        let videoDuration = 4.04; // 4.04s, 24fps (97 frames)
+        let curTime = 0;
+        let lastScrollY = window.scrollY || window.pageYOffset || 0;
+        let lastTime = performance.now();
+        let smoothSpeed = 0;
+        let lettersWidth = 1000;
+        let stripWidth = 1800;
+        let lastSeekTimestamp = 0;
+
+        // Cubic Bezier Solver for Recorder Mode
+        function solveBezierX(targetX, p1x, p2x) {
+          let t = targetX;
+          for (let i = 0; i < 10; i++) {
+            const currentX = 3 * (1 - t) * (1 - t) * t * p1x + 3 * (1 - t) * t * t * p2x + t * t * t;
+            const error = currentX - targetX;
+            if (Math.abs(error) < 0.0001) break;
+            const dx = 3 * (1 - t) * (1 - t) * p1x + 6 * (1 - t) * t * (p2x - p1x) + 3 * t * t * (1 - p2x);
+            if (Math.abs(dx) < 0.000001) break;
+            t -= error / dx;
+          }
+          return Math.min(1, Math.max(0, t));
+        }
+
+        function bezierVal(t, p1y, p2y) {
+          return 3 * (1 - t) * (1 - t) * t * p1y + 3 * (1 - t) * t * t * p2y + t * t * t;
+        }
+
+        function bezierDeriv(t, p1, p2) {
+          return 3 * (1 - t) * (1 - t) * p1 + 6 * (1 - t) * t * (p2 - p1) + 3 * t * t * (1 - p2);
+        }
+
+        // Layout calculation: Viewport, Unit u, Video Cover & Framing, Track Height
+        function updateLayout() {
+          const vw = window.innerWidth;
+          const vh = window.innerHeight;
+          const isPhone = vw < 768 || vw <= vh;
+
+          // Unit u: min(100vw/1440, 100vh/960) on desktop; min(100vw/430, 1.4px) on phones
+          const u = isPhone
+            ? Math.min(vw / 430, 1.4)
+            : Math.min(vw / 1440, vh / 960);
+          document.documentElement.style.setProperty('--u', `${u}px`);
+
+          let edgePx = 0;
+
+          if (!isPhone) {
+            // Wide screens: cover (scale = max(vw/1920, vh/1080), centred)
+            const scale = Math.max(vw / 1920, vh / 1080);
+            const videoW = 1920 * scale;
+            const videoH = 1080 * scale;
+            const videoLeft = (vw - videoW) / 2;
+            const videoTop = (vh - videoH) / 2;
+
+            videoEl.style.width = `${videoW}px`;
+            videoEl.style.height = `${videoH}px`;
+            videoEl.style.left = `${videoLeft}px`;
+            videoEl.style.top = `${videoTop}px`;
+
+            // Edge px: clip top + 0.448 * clip height
+            edgePx = videoTop + 0.448 * videoH;
+          } else {
+            // Portrait or narrow screens (below 768px, or vw <= vh):
+            // width 155vw, horizontally positioned so 40% of the frame sits at mid-screen,
+            // and vertically so the final band edge lands at 36% of the viewport.
+            const videoW = 1.55 * vw;
+            const videoH = (1080 / 1920) * videoW;
+            const videoLeft = vw / 2 - 0.40 * videoW;
+            const videoTop = 0.36 * vh - 0.448 * videoH;
+
+            videoEl.style.width = `${videoW}px`;
+            videoEl.style.height = `${videoH}px`;
+            videoEl.style.left = `${videoLeft}px`;
+            videoEl.style.top = `${videoTop}px`;
+
+            edgePx = 0.36 * vh;
+          }
+
+          document.documentElement.style.setProperty('--edge-px', `${edgePx}px`);
+
+          // Measure strip width and giant letters width
+          const measuredStrip = stripEl.getBoundingClientRect().width;
+          if (measuredStrip > 100) stripWidth = measuredStrip;
+
+          const measuredLetters = lettersEl.scrollWidth || lettersEl.getBoundingClientRect().width;
+          if (measuredLetters > 100) lettersWidth = measuredLetters;
+
+          // B = (strip width + 0.45 * vw) / vw * 1.1 viewports
+          B = ((stripWidth + 0.45 * vw) / vw) * 1.1;
+
+          // Track height: (1 + A + B) * viewport
+          const totalTrackHeight = (1 + A + B) * vh;
+          trackEl.style.height = `${totalTrackHeight}px`;
+        }
+
+        // On video metadata loaded
+        videoEl.addEventListener('loadedmetadata', function () {
+          if (videoEl.duration && !isNaN(videoEl.duration) && videoEl.duration > 1) {
+            videoDuration = videoEl.duration;
+          }
+          updateLayout();
+        });
+
+        // Re-seek on seeked if user scrubbed ahead
+        videoEl.addEventListener('seeked', function () {
+          if (Math.abs(curTime - videoEl.currentTime) > 1 / 60) {
+            try {
+              videoEl.currentTime = curTime;
+            } catch (err) {}
+          }
+        });
+
+        // Update card reveal gradients
+        function updateCardReveals(vw) {
+          for (let i = 0; i < cards.length; i++) {
+            const card = cards[i];
+            const cardLeft = card.getBoundingClientRect().left;
+            const s_norm = Math.min(1.6, Math.max(-0.4, (0.98 - cardLeft / vw) / 0.3));
+            const s = s_norm * 100;
+            const pWhite = Math.max(0, s - 34);
+            const pCobalt = Math.max(0, s - 6);
+            const pTrans = Math.min(100, Math.max(0, s + 26));
+
+            const revealEls = card.querySelectorAll('.card-reveal-text');
+            const gradient = `linear-gradient(90deg, #ffffff 0%, #ffffff ${pWhite}%, #2f63ff ${pCobalt}%, transparent ${pTrans}%)`;
+            for (let j = 0; j < revealEls.length; j++) {
+              revealEls[j].style.backgroundImage = gradient;
+            }
+          }
+        }
+
+        // Single rAF Loop for Scroll Mapping
+        function renderFrame(now) {
+          const vw = window.innerWidth;
+          const vh = window.innerHeight;
+          const scrollY = window.scrollY || window.pageYOffset || 0;
+
+          // Delta time for speed readout
+          const dt = Math.max(0.001, (now - lastTime) / 1000);
+          const dy = Math.abs(scrollY - lastScrollY);
+          lastTime = now;
+          lastScrollY = scrollY;
+
+          // Clip time calculation: q = clamp(scrollY / (A * vh))
+          const validDuration = (videoDuration && !isNaN(videoDuration) && videoDuration > 1) ? videoDuration : 4.04;
+          const q = Math.min(1, Math.max(0, scrollY / Math.max(1, A * vh)));
+          const targetTime = Math.min(validDuration - 1 / 48, Math.max(0, q * (validDuration - 1 / 48)));
+
+          // Ease toward target time each frame (cur += (target - cur) * 0.2)
+          if (isNaN(curTime)) curTime = 0;
+          curTime += (targetTime - curTime) * 0.2;
+
+          // Seek when not already seeking or when seeking has exceeded 250ms safety window
+          const timeDiff = Math.abs(curTime - videoEl.currentTime);
+          if ((!videoEl.seeking || (now - lastSeekTimestamp > 250)) && timeDiff > 1 / 60) {
+            lastSeekTimestamp = now;
+            try {
+              videoEl.currentTime = curTime;
+            } catch (err) {}
+          }
+
+          // Settled flag: when q >= 0.94, set --ph = 1
+          const isSettled = q >= 0.94;
+          document.documentElement.style.setProperty('--ph', isSettled ? '1' : '0');
+
+          // Smooth scroll speed calculation: (|dy|/dt ÷ 32, capped at 99, two digits)
+          const rawSpeed = (dy / dt) / 32;
+          smoothSpeed += (rawSpeed - smoothSpeed) * 0.15;
+          const displaySpeed = Math.min(99, Math.round(smoothSpeed));
+          speedEl.textContent = `${String(displaySpeed).padStart(2, '0')} KM/H`;
+
+          // Strip progress: r = clamp((scrollY - A * vh) / (B * vh))
+          const r = Math.min(1, Math.max(0, (scrollY - A * vh) / Math.max(1, B * vh)));
+
+          // Strip translation: strip translateX = vw - r * (stripWidth + 0.45 * vw)
+          const stripX = vw - r * (stripWidth + 0.45 * vw);
+          document.documentElement.style.setProperty('--strip-x', `${stripX}`);
+
+          // Giant letters translation: giant letters translateX = vw - r * (lettersWidth + vw)
+          const lettersX = vw - r * (lettersWidth + vw);
+          document.documentElement.style.setProperty('--letters-x', `${lettersX}`);
+
+          // Update card reveal gradients
+          updateCardReveals(vw);
+
+          requestAnimationFrame(renderFrame);
+        }
+
+        // Recorder mode (?rec=1): Deterministic 11s driver
+        window.__recTime = function (vid, t) {
+          const totalDuration = 11;
+          const tNorm = Math.min(totalDuration, Math.max(0, t));
+          const tFrac = tNorm / totalDuration;
+          let progress = 0;
+          let dProgressDt = 0;
+
+          if (tFrac <= 0.04) {
+            progress = 0;
+            dProgressDt = 0;
+          } else if (tFrac >= 0.96) {
+            progress = 1;
+            dProgressDt = 0;
+          } else {
+            const tau = (tFrac - 0.04) / 0.92;
+            const u = solveBezierX(tau, 0.4, 0.55);
+            progress = bezierVal(u, 0.05, 0.95);
+            const dydx = bezierDeriv(u, 0.05, 0.95) / Math.max(0.001, bezierDeriv(u, 0.4, 0.55));
+            dProgressDt = dydx / (0.92 * totalDuration);
+          }
+
+          const vh = window.innerHeight;
+          const maxScroll = Math.max(1, (1 + A + B) * vh - vh);
+          const targetScrollY = progress * maxScroll;
+          window.scrollTo(0, targetScrollY);
+
+          // Scripted speed
+          const speed = Math.min(99, Math.round(Math.abs(dProgressDt * maxScroll) / 32));
+          speedEl.textContent = `${String(speed).padStart(2, '0')} KM/H`;
+
+          // Clip time
+          const q = Math.min(1, Math.max(0, targetScrollY / (A * vh)));
+          const validDuration = (videoDuration && !isNaN(videoDuration) && videoDuration > 1) ? videoDuration : 4.04;
+          const clipTime = q * (validDuration - 1 / 48);
+          try {
+            vid.currentTime = clipTime;
+          } catch (e) {}
+          return clipTime;
+        };
+
+        // If ?rec=1 is in URL, auto-play recorder script
+        if (window.location.search.includes('rec=1')) {
+          let recStart = null;
+          function runRecorder(now) {
+            if (!recStart) recStart = now;
+            const t = (now - recStart) / 1000;
+            window.__recTime(videoEl, t);
+            if (t <= 11.2) {
+              requestAnimationFrame(runRecorder);
+            }
+          }
+          requestAnimationFrame(runRecorder);
+        }
+
+        // Initialize layout and font readiness
+        window.addEventListener('resize', updateLayout);
+        window.addEventListener('orientationchange', updateLayout);
+        document.addEventListener('DOMContentLoaded', updateLayout);
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(updateLayout);
+        }
+
+        updateLayout();
+        requestAnimationFrame(renderFrame);
+
+        // Smooth scroll to services when clicking "Our services" pill
+        servicesPill.addEventListener('click', function () {
+          const vh = window.innerHeight;
+          window.scrollTo({
+            top: A * vh + 10,
+            behavior: 'smooth'
+          });
+        });
+
+        // Interactive Modal Handlers
+        function openModal(drawer) {
+          backdrop.classList.add('open');
+          drawer.classList.add('open');
+          drawer.setAttribute('aria-hidden', 'false');
+          document.body.style.overflow = 'hidden';
+        }
+
+        function closeModals() {
+          backdrop.classList.remove('open');
+          quoteDrawer.classList.remove('open');
+          menuDrawer.classList.remove('open');
+          quoteDrawer.setAttribute('aria-hidden', 'true');
+          menuDrawer.setAttribute('aria-hidden', 'true');
+          document.body.style.overflow = '';
+        }
+
+        quoteBtn.addEventListener('click', function () {
+          openModal(quoteDrawer);
+        });
+
+        menuBtn.addEventListener('click', function () {
+          openModal(menuDrawer);
+        });
+
+        followBtn.addEventListener('click', function () {
+          alert('Subscribed to KV Group lane advisories and dispatch bulletins.');
+        });
+
+        quoteClose.addEventListener('click', closeModals);
+        menuClose.addEventListener('click', closeModals);
+        backdrop.addEventListener('click', closeModals);
+
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape') {
+            closeModals();
+          }
+        });
+
+        menuLinkServices.addEventListener('click', function (e) {
+          e.preventDefault();
+          closeModals();
+          const vh = window.innerHeight;
+          window.scrollTo({
+            top: A * vh + 10,
+            behavior: 'smooth'
+          });
+        });
+
+      })();
+    </script>
+  </body>
+</html>

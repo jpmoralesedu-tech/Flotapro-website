@@ -1,0 +1,6 @@
+{
+  "name": "KV Freight Services",
+  "description": "A scroll-driven freight hero experience for KV, showcasing reach-stacker handling and integrated freight logistics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
